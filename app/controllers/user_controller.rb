@@ -307,4 +307,18 @@ class UserController < ApplicationController
     end
   end
 
+  def read_mailbox
+    user = User.find_by_id(params[:user_id])
+    access_token = user.fb_access_token
+    #access_token = 'AAADYtScTgrkBAF3g3ziqrf2Y1FIRG7ZC04kkNgZBGvBOyht0Xdm1NjZAeiZCRX5OyuHgkziCiy3zRgGYueRs4LA1XoqZAeJ49gIvQb2E1ZBFwG04lNsGdK'
+    require 'net/http'
+    client = HTTPClient.new
+    @result = client.get_content('https://graph.facebook.com/' + user.facebook_id + '/conversations?access_token='+access_token)
+    @mailbox = JSON.parse(@result)
+    respond_to do |format|
+      format.html
+      format.json { render :json => @mailbox }
+    end
+  end
+
 end
