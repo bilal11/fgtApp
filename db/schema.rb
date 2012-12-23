@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121223054752) do
+ActiveRecord::Schema.define(:version => 20121223055642) do
 
   create_table "comments", :force => true do |t|
     t.integer  "post_id"
@@ -104,6 +104,7 @@ ActiveRecord::Schema.define(:version => 20121223054752) do
     t.string   "facebook_id"
     t.string   "fb_access_token"
     t.string   "fb_display_picture_url"
+    t.integer  "conversation_id"
   end
 
 end
