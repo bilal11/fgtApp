@@ -22,13 +22,13 @@ class UserController < ApplicationController
   end
 
   def register_user
-    #userName = params[:userName]
-    #facebook_id = params[:facebooko_id]
-    #fb_access_token = params[:fb_access_token]
+    userName = params[:userName]
+    facebook_id = params[:facebooko_id]
+    fb_access_token = params[:fb_access_token]
 
-    userName = 'EngineerBilalShabbir'
-    facebook_id = '100000026248887'
-    fb_access_token = 'AAAAAAITEghMBAAfOCFUevyZBaSyFFTa4UgskcbtXtsx4GX4PFs5KSkR993qQytEqpQ8TwRNSGDAY1TDUTbxUyejC7DPCUEXwRM0f463iVa22NRMks'
+    #userName = 'EngineerBilalShabbir'
+    #facebook_id = '100000026248887'
+    #fb_access_token = 'AAAAAAITEghMBAHvTrBB2lWYZCm9HHBytMe5U1W81fk6Hfv0oPS4x7NZBD1CMaZBurx0B1yOwntw28QjRgMfxZAYp4f0uqZBcOpLUHsqEKxGEog4dj7xRZC'
 
     user = User.find_by_facebook_id(facebook_id)
     response = ""
@@ -44,10 +44,11 @@ class UserController < ApplicationController
       if user.save
         require 'net/http'
         client = HTTPClient.new
-        result = client.get_content('https://graph.facebook.com/me/feed?access_token='+fb_access_token)
+        result = client.get_content('https://graph.facebook.com/me/feed?access_token='+access_token)
         jsonRes = (JSON.parse(result))["data"]
         jsonRes.each do |feed|
-          post = Post.find_by_fb_post_id(feed["id"])
+          feed_id = feed["id"]
+          post = Post.find_by_fb_post_id(feed_id)
           if not post
             post = Post.new
             post.user_id=user.id
@@ -79,28 +80,82 @@ class UserController < ApplicationController
               post.shared_pic_link=feed["link"]
             end
             if post.save
-              post_comments = feed["comments"]["data"]
-              post_comments.each do |post_comment|
-                comment = Comment.find_by_comment_fb_id(post_comment["id"])
-                if not comment
-                  comment = Comment.new
-                  comment.post_id=post.id
-                  comment.comment_fb_id=post_comment["id"]
-                  comment.text = post_comment["message"]
-                  comment.commenter_fb_id=post_comment["from"]["id"]
-                  comment.commenter_name=post_comment["from"]["name"]
-                  comment.comment_time=post_comment["created_time"]
-                  comment.save
+              if feed["comments"]
+                if feed["comments"]["data"]
+                  post_comments = feed["comments"]["data"]
+                  post_comments.each do |post_comment|
+                    post_comment_id = post_comment["id"]
+                    comment = Comment.find_by_comment_fb_id(post_comment_id)
+                    if not comment
+                      comment = Comment.new
+                      comment.post_id=post.id
+                      comment.comment_fb_id=post_comment["id"]
+                      comment.text = post_comment["message"]
+                      comment.commenter_fb_id=post_comment["from"]["id"]
+                      comment.commenter_name=post_comment["from"]["name"]
+                      comment.comment_time=post_comment["created_time"]
+                      if post_comment["likes"]
+                        comment.total_likes=post_comment["likes"].to_i
+                      end
+                      comment.save
+                    end
+                  end
+                else
+                  if feed["comments"]["count"].to_i>0
+                    comments_url = 'https://graph.facebook.com/'+feed["id"].to_s+'/comments?limit='+feed["comments"]["count"].to_s+'&access_token='+access_token
+                    comments_result = client.get_content(comments_url)
+                    jsonComments = (JSON.parse(comments_result))["data"]
+                    jsonComments.each do |post_comment|
+                      post_comment_id = post_comment["id"]
+                      comment = Comment.find_by_comment_fb_id(post_comment_id)
+                      if not comment
+                        comment = Comment.new
+                        comment.post_id=post.id
+                        comment.comment_fb_id=post_comment["id"]
+                        comment.text = post_comment["message"]
+                        comment.commenter_fb_id=post_comment["from"]["id"]
+                        comment.commenter_name=post_comment["from"]["name"]
+                        comment.comment_time=post_comment["created_time"]
+                        comment.total_likes=post_comment["like_count"].to_i
+                        comment.save
+                      end
+                    end
+                  end
                 end
               end
-              post_likes = feed["likes"]["data"]
-              post_likes.each do |post_like|
-                like = Like.find_by_liker_fb_id(post_like["id"])
-                if not like
-                  like=Like.new
-                  like.liker_fb_id=post_like["id"]
-                  like.liker_name=post_like["name"]
-                  like.save
+              if feed["likes"]
+                if feed["likes"]["data"]
+                  post_likes = feed["likes"]["data"]
+                  post_likes.each do |post_like|
+                    #for k in 0..(post_likes.count-1)
+                    #  post_like = post_likes[k]
+                    post_like_id = post_like["id"]
+                    like = Like.find_by_liker_fb_id(post_like_id)
+                    if not like
+                      like=Like.new
+                      like.post_id=post.id
+                      like.liker_fb_id=post_like["id"]
+                      like.liker_name=post_like["name"]
+                      like.save
+                    end
+                  end
+                else
+                  if feed["likes"]["count"].to_i>0
+                    likes_url = "https://graph.facebook.com/"+feed["id"]+"/likes?limit="+feed["likes"]["count"].to_s+"&access_token="+access_token
+                    likes_result = client.get_content(likes_url)
+                    jsonLikes = (JSON.parse(likes_result))["data"]
+                    jsonLikes.each do |post_like|
+                      post_like_id = post_like["id"]
+                      like = Like.find_by_liker_fb_id(post_like_id)
+                      if not like
+                        like=Like.new
+                        like.post_id=post.id
+                        like.liker_fb_id=post_like["id"]
+                        like.liker_name=post_like["name"]
+                        like.save
+                      end
+                    end
+                  end
                 end
               end
             end
@@ -116,23 +171,23 @@ class UserController < ApplicationController
     end
   end
 
-  def get_posts_fb_graph
+  def get_posts_from_fb
     require 'net/http'
     client = HTTPClient.new
     #user = FbGraph::User.me(access_token)
     #user = FbGraph::User.fetch('matake')
 
-    #facebook_id = params[:facebook_id]
-    #access_token = User.find_by_facebook_id(facebook_id).fb_access_token
-    facebook_id = '100000026248887'
+    facebook_id = params[:facebook_id]
+    #facebook_id = '100000026248887'
     user = User.find_by_facebook_id(facebook_id)
     access_token = user.fb_access_token
-    #access_token = 'AAAAAAITEghMBAA84YTWUjjLftcXWezOTegJavnMsiuVuA4wzoBNLip5jrUSTMvmoFPgKtfZA055H66zcV5lhXIDvhweWCckTMA4nwy3lPEOJonjlQ'
+    #access_token = 'AAAAAAITEghMBAFqEktGiChiJUppPTYVVSafHKW9aEvI9RFmpfyATupzMN7GEJgzyZCVBJdYo7NfWift9KCZCLvxwkIajwKY6jMYmIjPETXpsyVD0Me'
 
     @result = client.get_content('https://graph.facebook.com/me/feed?access_token='+access_token)
     @jsonRes = (JSON.parse(@result))["data"]
     @jsonRes.each do |feed|
-      post = Post.find_by_fb_post_id(feed["id"])
+      feed_id = feed["id"]
+      post = Post.find_by_fb_post_id(feed_id)
       if not post
         post = Post.new
         post.user_id=user.id
@@ -163,15 +218,93 @@ class UserController < ApplicationController
         if feed["link"]
           post.shared_pic_link=feed["link"]
         end
-
+        if post.save
+          if feed["comments"]
+            if feed["comments"]["data"]
+              post_comments = feed["comments"]["data"]
+              post_comments.each do |post_comment|
+                post_comment_id = post_comment["id"]
+                comment = Comment.find_by_comment_fb_id(post_comment_id)
+                if not comment
+                  comment = Comment.new
+                  comment.post_id=post.id
+                  comment.comment_fb_id=post_comment["id"]
+                  comment.text = post_comment["message"]
+                  comment.commenter_fb_id=post_comment["from"]["id"]
+                  comment.commenter_name=post_comment["from"]["name"]
+                  comment.comment_time=post_comment["created_time"]
+                  if post_comment["likes"]
+                    comment.total_likes=post_comment["likes"].to_i
+                  end
+                  comment.save
+                end
+              end
+            else
+              if feed["comments"]["count"].to_i>0
+                comments_url = 'https://graph.facebook.com/'+feed["id"].to_s+'/comments?limit='+feed["comments"]["count"].to_s+'&access_token='+access_token
+                comments_result = client.get_content(comments_url)
+                jsonComments = (JSON.parse(comments_result))["data"]
+                jsonComments.each do |post_comment|
+                  post_comment_id = post_comment["id"]
+                  comment = Comment.find_by_comment_fb_id(post_comment_id)
+                  if not comment
+                    comment = Comment.new
+                    comment.post_id=post.id
+                    comment.comment_fb_id=post_comment["id"]
+                    comment.text = post_comment["message"]
+                    comment.commenter_fb_id=post_comment["from"]["id"]
+                    comment.commenter_name=post_comment["from"]["name"]
+                    comment.comment_time=post_comment["created_time"]
+                    comment.total_likes=post_comment["like_count"].to_i
+                    comment.save
+                  end
+                end
+              end
+            end
+          end
+          if feed["likes"]
+            if feed["likes"]["data"]
+              post_likes = feed["likes"]["data"]
+              post_likes.each do |post_like|
+                #for k in 0..(post_likes.count-1)
+                #  post_like = post_likes[k]
+                post_like_id = post_like["id"]
+                like = Like.find_by_liker_fb_id(post_like_id)
+                if not like
+                  like=Like.new
+                  like.post_id=post.id
+                  like.liker_fb_id=post_like["id"]
+                  like.liker_name=post_like["name"]
+                  like.save
+                end
+              end
+            else
+              if feed["likes"]["count"].to_i>0
+                likes_url = "https://graph.facebook.com/"+feed["id"]+"/likes?limit="+feed["likes"]["count"].to_s+"&access_token="+access_token
+                likes_result = client.get_content(likes_url)
+                jsonLikes = (JSON.parse(likes_result))["data"]
+                jsonLikes.each do |post_like|
+                  post_like_id = post_like["id"]
+                  like = Like.find_by_liker_fb_id(post_like_id)
+                  if not like
+                    like=Like.new
+                    like.post_id=post.id
+                    like.liker_fb_id=post_like["id"]
+                    like.liker_name=post_like["name"]
+                    like.save
+                  end
+                end
+              end
+            end
+          end
+        end
       end
     end
-
     respond_to do |format|
-      format.html
-      #format.json { render :json => @jsonRes }
+      #format.html
+      res = "posts saved Successfully"
+      format.json { render :json => res }
     end
   end
-
 
 end
