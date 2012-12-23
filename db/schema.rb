@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121222163813) do
+ActiveRecord::Schema.define(:version => 20121223054752) do
 
   create_table "comments", :force => true do |t|
     t.integer  "post_id"
@@ -21,6 +21,15 @@ ActiveRecord::Schema.define(:version => 20121222163813) do
     t.text     "text"
     t.datetime "comment_time"
     t.string   "commenter_fb_id"
+  end
+
+  create_table "conversations", :force => true do |t|
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+    t.integer  "message_id"
+    t.integer  "tag_id"
+    t.integer  "participant_id"
+    t.text     "snippet"
   end
 
   create_table "events", :force => true do |t|
@@ -46,13 +55,11 @@ ActiveRecord::Schema.define(:version => 20121222163813) do
   end
 
   create_table "messages", :force => true do |t|
-    t.datetime "created_at",                       :null => false
-    t.datetime "updated_at",                       :null => false
-    t.boolean  "can_reply",      :default => true
-    t.boolean  "is_subscribed",  :default => true
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+    t.boolean  "can_reply",     :default => true
+    t.boolean  "is_subscribed", :default => true
     t.text     "msg"
-    t.integer  "tag_id"
-    t.integer  "participant_id"
     t.datetime "msg_time"
   end
 
