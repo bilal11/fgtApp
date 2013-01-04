@@ -3,6 +3,8 @@ require 'koala'
 
 class UserController < ApplicationController
 
+
+
   def get_posts_koala
     graph = Koala::Facebook::GraphAPI.new('AAAG2mnvP5UUBANMtbl1pEUYZApVKZC8kCkvnvYzKJrZColZBx0BgqJcjiw1JYMXUiRsFEdHG1GuQ82jtZB1B36qRRKy1WLXVbZB9EzZA1emdIwwLELXS5vt')
     #res = graph.get_object("me")
