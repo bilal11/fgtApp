@@ -21,9 +21,25 @@ class UserController < ApplicationController
     end
   end
 
+  def get_all_posts
+    user = User.find_by_facebook_id(params[:facebook_id])
+    response = ""
+    if user
+      posts = user.posts.all
+      respond_to do |format|
+        format.json { render :json => posts}
+      end
+    else
+      response = "user not found"
+      respond_to do |format|
+        format.json { render :json => response}
+      end
+    end
+  end
+
   def register_user
     userName = params[:userName]
-    facebook_id = params[:facebooko_id]
+    facebook_id = params[:facebook_id]
     fb_access_token = params[:fb_access_token]
 
     #userName = 'EngineerBilalShabbir'
