@@ -25,9 +25,24 @@ class UserController < ApplicationController
 
   def get_all_posts
     user = User.find_by_facebook_id(params[:facebook_id])
-    response = ""
     if user
-      posts = user.posts.all
+      posts = user.posts.where(:post_from => "home")
+      respond_to do |format|
+        format.json { render :json => posts}
+      end
+    else
+      response = "user not found"
+      respond_to do |format|
+        format.json { render :json => response}
+      end
+    end
+  end
+
+  def get_my_posts
+    user = User.find_by_facebook_id(params[:facebook_id])
+
+    if user
+      posts = user.posts.where(:post_from => "feed")
       respond_to do |format|
         format.json { render :json => posts}
       end
