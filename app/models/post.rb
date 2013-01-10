@@ -170,7 +170,7 @@ class Post < ActiveRecord::Base
         if not post
           post = Post.new
           post.user_id=user.id
-          post.post_from = "feed"
+          post.post_from = "home"
           post.fb_post_id=feed["id"]
           post.poster_fb_id=feed["from"]["id"]
           post.poster_name=feed["from"]["name"]
