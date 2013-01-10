@@ -23,9 +23,7 @@ class UserController < ApplicationController
              render :text => 'Failed to authorize facebook challenge request'
            end
          when "POST"
-           case params['object']
 
-           end
            render :text => 'Thanks for the update.'
        end
      #end
