@@ -1,4 +1,3 @@
-
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -11,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121223164010) do
+ActiveRecord::Schema.define(:version => 20130108110719) do
 
   create_table "comments", :force => true do |t|
     t.integer  "post_id"
@@ -23,6 +22,15 @@ ActiveRecord::Schema.define(:version => 20121223164010) do
     t.string   "commenter_fb_id"
     t.string   "comment_fb_id"
     t.integer  "total_likes",     :default => 0
+  end
+
+  create_table "conversations", :force => true do |t|
+    t.datetime "created_at",     :null => false
+    t.datetime "updated_at",     :null => false
+    t.integer  "message_id"
+    t.integer  "tag_id"
+    t.integer  "participant_id"
+    t.text     "snippet"
   end
 
   create_table "events", :force => true do |t|
@@ -47,6 +55,24 @@ ActiveRecord::Schema.define(:version => 20121223164010) do
     t.string   "liker_fb_id"
   end
 
+  create_table "messages", :force => true do |t|
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
+    t.boolean  "can_reply",     :default => true
+    t.boolean  "is_subscribed", :default => true
+    t.text     "msg"
+    t.datetime "msg_time"
+  end
+
+  create_table "participants", :force => true do |t|
+    t.datetime "created_at",    :null => false
+    t.datetime "updated_at",    :null => false
+    t.string   "name"
+    t.string   "facebook_id"
+    t.boolean  "is_sender"
+    t.string   "email_address"
+  end
+
   create_table "posts", :force => true do |t|
     t.datetime "created_at",                     :null => false
     t.datetime "updated_at",                     :null => false
@@ -64,6 +90,13 @@ ActiveRecord::Schema.define(:version => 20121223164010) do
     t.string   "shared_pic_link"
     t.text     "story"
     t.string   "poster_fb_id"
+    t.string   "post_from"
+  end
+
+  create_table "tags", :force => true do |t|
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+    t.string   "name"
   end
 
   create_table "users", :force => true do |t|
@@ -73,7 +106,7 @@ ActiveRecord::Schema.define(:version => 20121223164010) do
     t.string   "facebook_id"
     t.string   "fb_access_token"
     t.string   "fb_display_picture_url"
+    t.integer  "conversation_id"
   end
 
 end
-

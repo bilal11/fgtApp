@@ -2,11 +2,15 @@ FgtApp::Application.routes.draw do
   # The priority is based upon order of creation:
   # first created -> highest priority.
   resources :user
-  match '/posts' => 'user#get_posts_from_fb', :via =>:get
+
+  match '/home_posts' => 'user#get_home_posts_from_fb', :via =>:get
+  match '/feed_posts' => 'user#get_feed_posts_from_fb', :via =>:get
+
   match '/register_user' => 'user#register_user', :via =>:get
   match '/read_mailbox' => 'user#read_mailbox', :via =>:get
   match '/get_all_posts' => 'user#get_all_posts', :via =>:get
   match '/get_my_posts' => 'user#get_my_posts', :via =>:get
+
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
