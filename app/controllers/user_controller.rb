@@ -3,7 +3,29 @@ require 'koala'
 
 class UserController < ApplicationController
 
+   def realtime_request?(request)
+     ((request.method == "GET" && params['hub.mode'].present?) ||
+         (request.method == "POST" && request.headers['X-Hub-Signature'].present?))
+   end
 
+   def fb_subscription
+     if(realtime_request?(request))
+       case request.method
+         when "GET"
+           challenge = Koala::Facebook::RealtimeUpdates.meet_challenge(params,'fgtappusersubscription')
+           if(challenge)
+             render :text => challenge
+           else
+             render :text => 'Failed to authorize facebook challenge request'
+           end
+         when "POST"
+           case params['object']
+
+           end
+           render :text => 'Thanks for the update.'
+       end
+     end
+   end
 
   def get_posts_koala
     graph = Koala::Facebook::GraphAPI.new('AAAG2mnvP5UUBANMtbl1pEUYZApVKZC8kCkvnvYzKJrZColZBx0BgqJcjiw1JYMXUiRsFEdHG1GuQ82jtZB1B36qRRKy1WLXVbZB9EzZA1emdIwwLELXS5vt')
