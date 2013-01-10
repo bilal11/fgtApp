@@ -9,7 +9,11 @@ class UserController < ApplicationController
    end
 
    def fb_subscription
-     if(realtime_request?(request))
+     #@access_token ||= Koala::Facebook::OAuth.new(FACEBOOK_API_KEY,FACEBOOK_API_SECRET).get_app_access_token
+     #@realtime = Koala::Facebook::RealtimeUpdates.new(:app_id => FACEBOOK_API_KEY, :app_access_token => @access_token)
+     #@realtime.subscribe('user', 'first_name,uid,etc...', facebook_subscription_url,'SOME_TOKEN_HERE')
+
+     #if(realtime_request?(request))
        case request.method
          when "GET"
            challenge = Koala::Facebook::RealtimeUpdates.meet_challenge(params,'fgtappusersubscription')
@@ -24,7 +28,7 @@ class UserController < ApplicationController
            end
            render :text => 'Thanks for the update.'
        end
-     end
+     #end
    end
 
   def get_posts_koala
