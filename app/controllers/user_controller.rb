@@ -204,8 +204,18 @@ class UserController < ApplicationController
     end
   end
 
-  def get_posts_from_fb
-    Post
+  def get_home_posts_from_fb
+    p = Post.new
+    users = User.all.each do |user|
+      p.get_all_posts_from_facebook(user.facebook_id)
+    end
+  end
+
+  def get_feed_posts_from_fb
+    p = Post.new
+    users = User.all.each do |user|
+      p.get_my_posts_from_facebook(user.facebook_id)
+    end
   end
 
   def read_mailbox
