@@ -6,13 +6,13 @@ class Post < ActiveRecord::Base
   self.inheritance_column = nil
 
 
-  def get_my_posts_from_facebook
+  def get_my_posts_from_facebook(facebook_id)
     require 'net/http'
     client = HTTPClient.new
     #user = FbGraph::User.me(access_token)
     #user = FbGraph::User.fetch('matake')
 
-    facebook_id = params[:facebook_id]
+    #facebook_id = params[:facebook_id]
     #facebook_id = '100000026248887'
     user = User.find_by_facebook_id(facebook_id)
     if user
@@ -151,13 +151,11 @@ class Post < ActiveRecord::Base
     end
   end
 
-  def get_all_posts_from_facebook
+  def get_all_posts_from_facebook(facebook_id)
     require 'net/http'
     client = HTTPClient.new
-    #user = FbGraph::User.me(access_token)
-    #user = FbGraph::User.fetch('matake')
 
-    facebook_id = params[:facebook_id]
+    #facebook_id = params[:facebook_id]
     #facebook_id = '100000026248887'
     user = User.find_by_facebook_id(facebook_id)
     if user
