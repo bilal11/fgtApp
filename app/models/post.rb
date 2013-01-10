@@ -16,8 +16,8 @@ class Post < ActiveRecord::Base
     #facebook_id = '100000026248887'
     user = User.find_by_facebook_id(facebook_id)
     if user
-      #access_token = user.fb_access_token
-      access_token = 'AAAAAAITEghMBAEKj1M8AruicnSZCKhWIK8kj603FXcny8elLIZBePzMgL3a3Ab21NgtvK61PD0HBrfYnZCxRtX16q6UWbxWo3GGCs1sG4Yz94QxibRF'
+      access_token = user.fb_access_token
+      #access_token = 'AAAAAAITEghMBAEAZBbm50SCWbldw294c2ZCCePzamJGkoZAfT099muIyTIlVrmbqLL3QRhsMhv2jMJbZBAhw8Xm4DGBdEAj88mGIGmMXEXzrcY30Uy1D'
 
       @result = client.get_content('https://graph.facebook.com/me/feed?access_token='+access_token)
       @jsonRes = (JSON.parse(@result))["data"]
@@ -161,8 +161,8 @@ class Post < ActiveRecord::Base
     #facebook_id = '100000026248887'
     user = User.find_by_facebook_id(facebook_id)
     if user
-      #access_token = user.fb_access_token
-      access_token = 'AAAAAAITEghMBAEKj1M8AruicnSZCKhWIK8kj603FXcny8elLIZBePzMgL3a3Ab21NgtvK61PD0HBrfYnZCxRtX16q6UWbxWo3GGCs1sG4Yz94QxibRF'
+      access_token = user.fb_access_token
+      #access_token = 'AAAAAAITEghMBAEAZBbm50SCWbldw294c2ZCCePzamJGkoZAfT099muIyTIlVrmbqLL3QRhsMhv2jMJbZBAhw8Xm4DGBdEAj88mGIGmMXEXzrcY30Uy1D'
 
       @result = client.get_content('https://graph.facebook.com/me/home?access_token='+access_token)
       @jsonRes = (JSON.parse(@result))["data"]
