@@ -23,6 +23,36 @@ class UserController < ApplicationController
     end
   end
 
+  def get_my_posts
+    user = User.find_by_facebook_id(params[:facebook_id])
+    if user
+      posts = user.posts.where(:post_from => "feed")
+      respond_to do |format|
+        format.json { render :json => posts}
+      end
+    else
+      response = "user not found"
+      respond_to do |format|
+        format.json { render :json => response}
+      end
+    end
+  end
+
+  def get_all_posts
+    user = User.find_by_facebook_id(params[:facebook_id])
+    if user
+      posts = user.posts.where(:post_from => "home")
+      respond_to do |format|
+        format.json { render :json => posts}
+      end
+    else
+      response = "user not found"
+      respond_to do |format|
+        format.json { render :json => response}
+      end
+    end
+  end
+
   def register_user
     userName = params[:userName]
     facebook_id = params[:facebooko_id]
