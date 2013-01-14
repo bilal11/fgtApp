@@ -53,7 +53,12 @@ class UserController < ApplicationController
       access_token = 'AAAAAAITEghMBAArhLLTi7QZC09j3ZCFLH4gWFIM85CeZABfKjL8B7ZAzDOj5Y0DB3L2OxLhxqfbXVRnjMRabOftfat4izb5j8NUnZCkESs8QK27ZBre4Rk'
       post = user.posts.find(params[:post_id])
       client = HTTPClient.new
-      comments_url = 'https://graph.facebook.com/'+post.fb_post_id.to_s+'/comments?limit=999&__after_id='+post.comments.last.comment_fb_id.to_s+'&access_token='+access_token
+      comments_url = ''
+      if post.comments.last.nil?
+        comments_url = 'https://graph.facebook.com/'+post.fb_post_id.to_s+'/comments?limit=999&access_token='+access_token
+      else
+        comments_url = 'https://graph.facebook.com/'+post.fb_post_id.to_s+'/comments?limit=999&__after_id='+post.comments.last.comment_fb_id.to_s+'&access_token='+access_token
+      end
       comments_result = client.get_content(comments_url)
       jsonComments = (JSON.parse(comments_result))["data"]
       jsonComments.each do |post_comment|
