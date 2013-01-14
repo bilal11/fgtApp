@@ -3,31 +3,30 @@ require 'koala'
 
 class UserController < ApplicationController
 
-   def realtime_request?(request)
-     ((request.method == "GET" && params['hub.mode'].present?) ||
-         (request.method == "POST" && request.headers['X-Hub-Signature'].present?))
-   end
+  def realtime_request?(request)
+    ((request.method == "GET" && params['hub.mode'].present?) ||
+        (request.method == "POST" && request.headers['X-Hub-Signature'].present?))
+  end
 
-   def fb_subscription
-     #@access_token ||= Koala::Facebook::OAuth.new(FACEBOOK_API_KEY,FACEBOOK_API_SECRET).get_app_access_token
-     #@realtime = Koala::Facebook::RealtimeUpdates.new(:app_id => FACEBOOK_API_KEY, :app_access_token => @access_token)
-     #@realtime.subscribe('user', 'first_name,uid,etc...', facebook_subscription_url,'SOME_TOKEN_HERE')
+  def fb_subscription
+    #@access_token ||= Koala::Facebook::OAuth.new(FACEBOOK_API_KEY,FACEBOOK_API_SECRET).get_app_access_token
+    #@realtime = Koala::Facebook::RealtimeUpdates.new(:app_id => FACEBOOK_API_KEY, :app_access_token => @access_token)
+    #@realtime.subscribe('user', 'first_name,uid,etc...', facebook_subscription_url,'SOME_TOKEN_HERE')
 
-     #if(realtime_request?(request))
-       case request.method
-         when "GET"
-           challenge = Koala::Facebook::RealtimeUpdates.meet_challenge(params,'fgtappusersubscription')
-           if(challenge)
-             render :text => challenge
-           else
-             render :text => 'Failed to authorize facebook challenge request'
-           end
-         when "POST"
-
-           render :text => 'Thanks for the update.'
-       end
-     #end
-   end
+    #if(realtime_request?(request))
+    case request.method
+      when "GET"
+        challenge = Koala::Facebook::RealtimeUpdates.meet_challenge(params,'fgtappusersubscription')
+        if(challenge)
+          render :text => challenge
+        else
+          render :text => 'Failed to authorize facebook challenge request'
+        end
+      when "POST"
+        render :text => 'Thanks for the update.'
+    end
+    #end
+  end
 
   def get_posts_koala
     graph = Koala::Facebook::GraphAPI.new('AAAG2mnvP5UUBANMtbl1pEUYZApVKZC8kCkvnvYzKJrZColZBx0BgqJcjiw1JYMXUiRsFEdHG1GuQ82jtZB1B36qRRKy1WLXVbZB9EzZA1emdIwwLELXS5vt')
@@ -44,6 +43,45 @@ class UserController < ApplicationController
 
     respond_to do |format|
       format.json { render :json => feed }
+    end
+  end
+
+  def get_post_detail
+     user = User.find_by_facebook_id(params[:facebook_id])
+    if user
+      #access_token = user.access_token
+      access_token = 'AAAAAAITEghMBAArhLLTi7QZC09j3ZCFLH4gWFIM85CeZABfKjL8B7ZAzDOj5Y0DB3L2OxLhxqfbXVRnjMRabOftfat4izb5j8NUnZCkESs8QK27ZBre4Rk'
+      post = user.posts.find(params[:post_id])
+      client = HTTPClient.new
+      comments_url = 'https://graph.facebook.com/'+post.fb_post_id.to_s+'/comments?limit=999&__after_id='+post.comments.last.comment_fb_id.to_s+'&access_token='+access_token
+      comments_result = client.get_content(comments_url)
+      jsonComments = (JSON.parse(comments_result))["data"]
+      jsonComments.each do |post_comment|
+        post_comment_id = post_comment["id"]
+        comment = Comment.find_by_comment_fb_id(post_comment_id)
+        if not comment
+          comment = Comment.new
+          comment.post_id=post.id
+          comment.comment_fb_id=post_comment["id"]
+          comment.text = post_comment["message"]
+          comment.commenter_fb_id=post_comment["from"]["id"]
+          comment.commenter_name=post_comment["from"]["name"]
+          comment.comment_time=post_comment["created_time"]
+          comment.total_likes=post_comment["like_count"].to_i
+          comment.save
+        end
+      end
+      response = {}
+      response["post"] = post
+      response["post_comments"] = post.comments
+      response["post_likes"] = post.likes
+      respond_to do |format|
+        format.json { render :json => response }
+      end
+    else
+      respond_to do |format|
+        format.json { render :json => 'user not found' }
+      end
     end
   end
 
