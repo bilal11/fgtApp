@@ -49,8 +49,8 @@ class UserController < ApplicationController
   def get_post_detail
      user = User.find_by_facebook_id(params[:facebook_id])
     if user
-      #access_token = user.access_token
-      access_token = 'AAAAAAITEghMBAArhLLTi7QZC09j3ZCFLH4gWFIM85CeZABfKjL8B7ZAzDOj5Y0DB3L2OxLhxqfbXVRnjMRabOftfat4izb5j8NUnZCkESs8QK27ZBre4Rk'
+      access_token = user.access_token
+      #access_token = 'AAAAAAITEghMBAArhLLTi7QZC09j3ZCFLH4gWFIM85CeZABfKjL8B7ZAzDOj5Y0DB3L2OxLhxqfbXVRnjMRabOftfat4izb5j8NUnZCkESs8QK27ZBre4Rk'
       post = user.posts.find(params[:post_id])
       client = HTTPClient.new
       comments_url = ''
