@@ -11,7 +11,7 @@ FgtApp::Application.routes.draw do
   match '/get_all_posts' => 'user#get_all_posts', :via =>:get
   match '/get_my_posts' => 'user#get_my_posts', :via =>:get
   match '/fb_subscription' => 'user#fb_subscription', :via =>[:get, :post]
-
+  match '/post_detail' => 'user#get_post_detail', :via =>:get
 
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
