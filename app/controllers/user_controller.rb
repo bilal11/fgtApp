@@ -61,6 +61,7 @@ class UserController < ApplicationController
       end
       comments_result = client.get_content(comments_url)
       jsonComments = (JSON.parse(comments_result))["data"]
+      comments_count = post.total_comments
       jsonComments.each do |post_comment|
         post_comment_id = post_comment["id"]
         comment = Comment.find_by_comment_fb_id(post_comment_id)
@@ -74,8 +75,11 @@ class UserController < ApplicationController
           comment.comment_time=post_comment["created_time"]
           comment.total_likes=post_comment["like_count"].to_i
           comment.save
+          comments_count = comments_count+1
         end
       end
+      post.total_comments=comments_count
+      post.save
       response = {}
       response["post"] = post
       response["post_comments"] = post.comments
