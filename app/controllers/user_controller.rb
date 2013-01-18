@@ -137,7 +137,13 @@ class UserController < ApplicationController
     user = User.find_by_facebook_id(facebook_id)
     response = ""
     if user
-      response = 'user already exists'
+      user.fb_access_token=params[:fb_access_token]
+      if user.save
+        response = 'user already exists'
+      else
+        response = 'user could not created'
+      end
+
     else
       url = 'http://graph.facebook.com/'+facebook_id+'/picture'
       user = User.new
