@@ -1,5 +1,7 @@
 require 'rubygems'
 require 'koala'
+require 'net/http'
+require 'uri'
 
 class UserController < ApplicationController
 
@@ -43,6 +45,35 @@ class UserController < ApplicationController
 
     respond_to do |format|
       format.json { render :json => feed }
+    end
+  end
+
+  def like_facebook_post
+    post_id=params[:post_id]
+    user = User.find_by_facebook_id(params[:facebook_id])
+    res=""
+    if user
+      post = user.posts.find_by_id(post_id)
+      if post
+        access_token = user.fb_access_token
+        client = HTTPClient.new
+        like_url = "https://graph.facebook.com/"+post_id+"/likes?access_token="+access_token
+        req_result = Net::HTTP.post_form(URI.parse(like_url), {})
+        res=req_result
+        post.total_likes=post.total_likes+1
+        post.save
+        new_like = post.likes.new
+        new_like.liker_fb_id=user.facebook_id
+        new_like.liker_name=user.name
+        new_like.save
+      else
+        res="Post not found"
+      end
+    else
+       res="User not found"
+    end
+    respond_to do |format|
+      format.json { render :json => res }
     end
   end
 
