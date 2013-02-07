@@ -404,8 +404,11 @@ class UserController < ApplicationController
 
   def get_home_posts_from_fb
     p = Post.new
-    users = User.all.each do |user|
+    user = User.find_by_facebook_id(params[:facebook_id])
+    if user
+    #users = User.all.each do |user|
       p.get_all_posts_from_facebook(user.facebook_id)
+    #end
     end
     respond_to do |format|
       format.json { render :json => "ok" }
@@ -414,8 +417,11 @@ class UserController < ApplicationController
 
   def get_feed_posts_from_fb
     p = Post.new
-    users = User.all.each do |user|
+    user = User.find_by_facebook_id(params[:facebook_id])
+    if user
+    #users = User.all.each do |user|
       p.get_my_posts_from_facebook(user.facebook_id)
+    #end
     end
     respond_to do |format|
       format.json { render :json => "ok" }
